@@ -55,5 +55,16 @@ ChooseTopicIntent {ChosenTopic}
 ChooseTopicIntent I want {ChosenTopic}
 ChooseTopicIntent {ChosenTopic} please
 NumberOfPlayersIntent {NumberOfPlayers}
+NumberOfPlayersIntent {NumberOfPlayers} player
+NumberOfPlayersIntent {NumberOfPlayers} players
 NumberOfPlayersIntent We are {NumberOfPlayers} players
 NumberOfPlayersIntent We are {NumberOfPlayers}
+TrueIntent true
+TrueIntent correct
+TrueIntent yes
+TrueIntent ok
+TrueIntent valid
+FalseIntent false
+FalseIntent incorrect
+FalseIntent no
+FalseIntent wrong
