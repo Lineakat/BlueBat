@@ -8,6 +8,8 @@ http://amzn.to/1LGWsLG
 """
 
 from __future__ import print_function
+import urllib2
+import json
 
 categories = {
     "animals" : 27,
@@ -94,10 +96,14 @@ def list_all_topics():
     return build_response(session_attributes, speechlet_response)
 
 def generate_question(topic):
-    number = categories.values(topic)
-    link = "https://opentdb.com/api.php?amount=1&category=" + number + "&type=boolean"
-    f = requests.get(link)
-    return build_response(session_attributes, speechlet_response)
+    question = getQuestion(categories[topic]) #gets all of the information about a question
+    attributes = {"answer" : question["correct_answer"]}
+    return build_response(attributes, build_speechlet_response("Question", question["question"], question["question"], False)) #question["question"] means that it only returns the value that fits with the question key
+
+def getQuestion(categoryNumber):
+    url = 'https://opentdb.com/api.php?amount=1&category=' + str(categoryNumber) + '&type=boolean' #makes the url with the right category number
+    jsonString = urllib2.urlopen(url).read() #makes it into python from json
+    return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
 
 
 def on_intent(intent_request, session):
@@ -117,6 +123,10 @@ def on_intent(intent_request, session):
         return setMode({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
     elif intent_name == "ListModeIntent":
         return list_all_topics()
+    elif intent_name == "NumberOfPlayersIntent":
+        numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
+        attributes = {"players": numberOfPlayers} #making a new attribute for number of players.
+        return generate_question(session['attributes']['topic']) #lookins in attributes for the current topic value
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
