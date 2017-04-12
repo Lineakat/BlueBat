@@ -1,5 +1,11 @@
 RandomModeIntent play random mode
 RandomModeIntent play random
+RandomModeIntent pick any topic
+RandomModeIntent pick any subject
+RandomModeIntent pick any theme
+RandomModeIntent pick any question
+RandomModeIntent pick random
+RandomModeIntent pick randomly
 RandomModeIntent random
 RandomModeIntent random mode
 RandomModeIntent random question
@@ -8,6 +14,31 @@ RandomModeIntent random subject
 RandomModeIntent random subjects
 RandomModeIntent random topic
 RandomModeIntent random topics
+RandomModeIntent random theme
+RandomModeIntent random themes
+RandomModeIntent random area
 RandomModeIntent any topic
-RandomModeIntent pick any topic
 RandomModeIntent any subject
+RandomModeIntent any theme
+RandomModeIntent any area
+ListModeIntent pick a topic
+ListModeIntent pick a subject
+ListModeIntent pick a theme
+ListModeIntent pick an area
+ListModeIntent choose a topic
+ListModeIntent choose a subject
+ListModeIntent choose a theme
+ListModeIntent choose an area
+ListModeIntent list topics
+ListModeIntent list subjects
+ListModeIntent list themes
+ListModeIntent list areas
+ChooseTopicIntent pick {ChosenTopic}
+ChooseTopicIntent choose {ChosenTopic}
+ChooseTopicIntent go for {ChoosenTopic}
+ChooseTopicIntent {ChosenTopic}
+ChooseTopicIntent I want {ChosenTopic}
+ChooseTopicIntent {ChosenTopic} please
+NumberOfPlayersIntent {NumberOfPlayers}
+NumberOfPlayersIntent We are {NumberOfPlayers} players
+NumberOfPlayersIntent We are {NumberOfPlayers}
