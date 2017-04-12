@@ -88,19 +88,19 @@ def list_all_topics():
     category_list = categories.keys()
     for x in range(0, len(category_list) - 1):
         speech_output = speech_output + ", " + category_list[x]
-    speech_output = speech_output + ", and ," + category_list[-1]
+    speech_output = speech_output + ", and , " + category_list[-1]
 
     reprompt_text = "Choose a topic by saying the topic name."  # if user doesnt answer
     should_end_session = False
     speechlet_response = build_speechlet_response("List of topics", speech_output, reprompt_text, should_end_session)
     return build_response(session_attributes, speechlet_response)
 
-def generate_question(topic, speech_output):
-    question = getQuestion(categories[topic]) #gets all of the information about a question
-    attributes = {"answer" : question["correct_answer"]}
+def generate_question(speech_output, attributes):
+    api_question = getQuestion(categories[attributes["topic"]]) #gets all of the information about a question
+    attributes["api_question"] = api_question # saving api_question with existing attributes
 
     # question["question"] means that it only returns the value that fits with the question key
-    speechlet_response = build_speechlet_response("Question", speech_output + question["question"], question["question"], False)
+    speechlet_response = build_speechlet_response("Question", speech_output + api_question["question"] + " true or false?" , api_question["question"] + " true or false?" , False)
     return build_response(attributes, speechlet_response)
 
 def getQuestion(categoryNumber):
@@ -108,13 +108,20 @@ def getQuestion(categoryNumber):
     jsonString = urllib2.urlopen(url).read() #makes it into python from json
     return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
 
-def start_game(numberOfPlayers, topic):
+def start_game(numberOfPlayers, attributes):
     if(numberOfPlayers == "1"):
-        speech_output = "You have chosen single player mode"
+        speech_output = "You have chosen singleplayer mode, "
     else:
-        speech_output = "You have chosen multi player mode with " + numberOfPlayers + " players"
-    return generate_question(topic, speech_output)
+        speech_output = "You have chosen multiplayer mode with " + numberOfPlayers + " players, "
+    return generate_question(speech_output, attributes)
 
+
+def evaluate(answer, attributes):
+    if(str(answer) == attributes["api_question"]["correct_answer"]):
+        speech_output = "Your answer is correct, congratulations!"
+    else:
+        speech_output = "Your answer is wrong. Too bad "
+    return generate_question(speech_output, attributes)
 
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -122,24 +129,42 @@ def on_intent(intent_request, session):
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'])
 
+    print(session)
+
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
 
     # Dispatch to your skill's intent handlers
     if intent_name == "RandomModeIntent":
         return setModeAndAskNumber({"mode": "random"}, "You have chosen random mode. ")
+
     if intent_name == "ChooseTopicIntent":
         topic = intent['slots']['ChosenTopic']['value']
         return setModeAndAskNumber({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
-    elif intent_name == "ListModeIntent":
+
+    if intent_name == "ListModeIntent":
         return list_all_topics()
-    elif intent_name == "NumberOfPlayersIntent":
+
+    if intent_name == "NumberOfPlayersIntent":
         numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
         attributes = {"players": numberOfPlayers} #making a new attribute for number of players.
-        return start_game(numberOfPlayers, session['attributes']['topic']) #lookins in attributes for the current topic value
-    elif intent_name == "AMAZON.HelpIntent":
+        return start_game(numberOfPlayers, session['attributes']) #lookins in attributes for the current topic value
+
+    if intent_name == "RepeatQuestionIntent":
+        question = session['attributes']['api_question']['question'] + " true or false?" #looking at the attributes for the whole question slot and finding the actual question
+        speechlet_response = build_speechlet_response("Question", question, question, False)
+        return build_response({}, speechlet_response)
+
+    if intent_name == "TrueIntent":
+        return evaluate(True, session['attributes'])
+
+    if intent_name == "FalseIntent":
+        return evaluate(False, session['attributes'])
+
+    if intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
-    elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
+
+    if intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     else:
         raise ValueError("Invalid intent")
