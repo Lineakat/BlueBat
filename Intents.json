@@ -4,10 +4,7 @@
       "intent": "RandomModeIntent"
     },
     {
-      "intent": "TopicModeIntent"
-    },
-    {
-      "intent": "ListTopicsIntent"
+      "intent": "ListModeIntent"
     },
     {
       "intent": "ChooseTopicIntent",
