@@ -94,6 +94,10 @@ def list_all_topics():
     return build_response(session_attributes, speechlet_response)
 
 def generate_question(topic):
+    number = categories.values(topic)
+    link = "https://opentdb.com/api.php?amount=1&category=" + number + "&type=boolean"
+    f = requests.get(link)
+    return build_response(session_attributes, speechlet_response)
 
 
 def on_intent(intent_request, session):
