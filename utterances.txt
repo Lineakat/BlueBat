@@ -65,10 +65,19 @@ TrueIntent yes
 TrueIntent ok
 TrueIntent valid
 TrueIntent affirmative
+TrueIntent This is true
+TrueIntent This is correct
+TrueIntent This is ok
+TrueIntent That is true
+TrueIntent That is correct
+TrueIntent That is ok
 FalseIntent false
 FalseIntent incorrect
 FalseIntent no
 FalseIntent wrong
+FalseIntent This is false
+FalseIntent This is incorrect
+FalseIntent This is wrong
 RepeatQuestionIntent Please repeat the question
 RepeatQuestionIntent Please repeat
 RepeatQuestionIntent Repeat the question
