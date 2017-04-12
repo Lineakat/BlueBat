@@ -1,0 +1,31 @@
+{
+  "intents": [
+    {
+      "intent": "RandomModeIntent"
+    },
+    {
+      "intent": "TopicModeIntent"
+    },
+    {
+      "intent": "ListTopicsIntent"
+    },
+    {
+      "intent": "ChooseTopicIntent",
+      "slots": [
+        {
+          "name": "ChosenTopic",
+          "type": "TOPICS"
+        }
+      ]
+    },
+    {
+      "intent": "NumberOfPlayersIntent",
+      "slots": [
+        {
+          "name": "NumberOfPlayers",
+          "type": "NUMBER_OF_PLAYERS"
+        }
+      ]
+    }
+  ]
+}
