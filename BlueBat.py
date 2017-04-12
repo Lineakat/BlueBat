@@ -9,6 +9,11 @@ http://amzn.to/1LGWsLG
 
 from __future__ import print_function
 
+categories = {
+    "animals" : 27,
+    "general knowledge" : 9,
+    "music" : 12
+}
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -32,7 +37,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         'shouldEndSession': should_end_session
     }
 
-
+#returns a dictionary. Storing attributes... maybe
 def build_response(session_attributes, speechlet_response):
     return {
         'version': '1.0',
@@ -49,15 +54,15 @@ def get_welcome_response():
     """
 
     session_attributes = {}
-    card_title = "Welcome"
-    speech_output = "Welcome to blue bat. " \
+    card_title = "Welcome" #comes up on the app
+    speech_output = "Welcome to the blue bat quiz game. " \
                     "Do you want to pick a topic, shuffle all questions or do you want me to list all the topics. "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
-    reprompt_text = speech_output #if user doesnt answer
+    reprompt_text = "Do you want to pick a topic, shuffle all questions or do you want me to list all the topics. " #if user doesnt answer
     should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
+    speechlet_response = build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session)
+    return build_response(session_attributes, speechlet_response)
 
 
 def on_launch(launch_request, session):
@@ -70,16 +75,25 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-def setRandomMode(intent, session):
+def setMode(attributes, modeSpeech):
+    playersPrompt = "How many people are playing?"
+    return build_response(attributes, build_speechlet_response(playersPrompt, modeSpeech + playersPrompt, playersPrompt, False))
+
+
+def list_all_topics():
     session_attributes = {}
-    card_title = "RANDOM MODE"
-    speech_output = "RANDOM MODE"
+    speech_output = "The topics are "
+    category_list = categories.keys()
+    for x in range(0, len(category_list) - 1):
+        speech_output = speech_output + ", " + category_list[x]
+    speech_output = speech_output + ", and ," + category_list[-1]
 
-    reprompt_text = speech_output #if user doesnt answer
+    reprompt_text = "Choose a topic by saying the topic name."  # if user doesnt answer
     should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
+    speechlet_response = build_speechlet_response("List of topics", speech_output, reprompt_text, should_end_session)
+    return build_response(session_attributes, speechlet_response)
 
+def generate_question(topic):
 
 
 def on_intent(intent_request, session):
@@ -93,7 +107,12 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "RandomModeIntent":
-        return setRandomMode(intent, session)
+        return setMode({"mode": "random"}, "You have chosen random mode. ")
+    if intent_name == "ChooseTopicIntent":
+        topic = intent['slots']['ChosenTopic']['value']
+        return setMode({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
+    elif intent_name == "ListModeIntent":
+        return list_all_topics()
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -102,7 +121,7 @@ def on_intent(intent_request, session):
         raise ValueError("Invalid intent")
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context): #this is where it starts from. Our main
     """ Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
     """
