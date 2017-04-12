@@ -1,0 +1,13 @@
+RandomModeIntent play random mode
+RandomModeIntent play random
+RandomModeIntent random
+RandomModeIntent random mode
+RandomModeIntent random question
+RandomModeIntent random questions
+RandomModeIntent random subject
+RandomModeIntent random subjects
+RandomModeIntent random topic
+RandomModeIntent random topics
+RandomModeIntent any topic
+RandomModeIntent pick any topic
+RandomModeIntent any subject
