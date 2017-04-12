@@ -41,6 +41,10 @@ ListModeIntent give me a list of topics
 ListModeIntent give me a list of subjects
 ListModeIntent give me a list of themes
 ListModeIntent give me a list of areas
+ListModeIntent give me a list of topics please
+ListModeIntent give me a list of subjects please
+ListModeIntent give me a list of themes please
+ListModeIntent give me a list of areas please
 ListModeIntent what topics are there
 ListModeIntent what subject are there
 ListModeIntent what themes are there
