@@ -64,7 +64,17 @@ TrueIntent correct
 TrueIntent yes
 TrueIntent ok
 TrueIntent valid
+TrueIntent affirmative
 FalseIntent false
 FalseIntent incorrect
 FalseIntent no
 FalseIntent wrong
+RepeatQuestionIntent Please repeat the question
+RepeatQuestionIntent Please repeat
+RepeatQuestionIntent Repeat the question
+RepeatQuestionIntent Repeat
+RepeatQuestionIntent Say again
+RepeatQuestionIntent What did you say
+RepeatQuestionIntent What was the question
+RepeatQuestionIntent I didn't catch that
+RepeatQuestionIntent What
