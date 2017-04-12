@@ -21,6 +21,10 @@ RandomModeIntent any topic
 RandomModeIntent any subject
 RandomModeIntent any theme
 RandomModeIntent any area
+RandomModeIntent all topics
+RandomModeIntent all subjects
+RandomModeIntent all themes
+RandomModeIntent all areas
 ListModeIntent pick a topic
 ListModeIntent pick a subject
 ListModeIntent pick a theme
@@ -33,6 +37,13 @@ ListModeIntent list topics
 ListModeIntent list subjects
 ListModeIntent list themes
 ListModeIntent list areas
+ListModeIntent give me a list of topics
+ListModeIntent give me a list of subjects
+ListModeIntent give me a list of themes
+ListModeIntent give me a list of areas
+ListModeIntent what topics are there
+ListModeIntent what subject are there
+ListModeIntent what themes are there
 ChooseTopicIntent pick {ChosenTopic}
 ChooseTopicIntent choose {ChosenTopic}
 ChooseTopicIntent go for {ChoosenTopic}
