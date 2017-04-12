@@ -77,7 +77,7 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
-def setMode(attributes, modeSpeech):
+def setModeAndAskNumber(attributes, modeSpeech):
     playersPrompt = "How many people are playing?"
     return build_response(attributes, build_speechlet_response(playersPrompt, modeSpeech + playersPrompt, playersPrompt, False))
 
@@ -95,15 +95,25 @@ def list_all_topics():
     speechlet_response = build_speechlet_response("List of topics", speech_output, reprompt_text, should_end_session)
     return build_response(session_attributes, speechlet_response)
 
-def generate_question(topic):
+def generate_question(topic, speech_output):
     question = getQuestion(categories[topic]) #gets all of the information about a question
     attributes = {"answer" : question["correct_answer"]}
-    return build_response(attributes, build_speechlet_response("Question", question["question"], question["question"], False)) #question["question"] means that it only returns the value that fits with the question key
+
+    # question["question"] means that it only returns the value that fits with the question key
+    speechlet_response = build_speechlet_response("Question", speech_output + question["question"], question["question"], False)
+    return build_response(attributes, speechlet_response)
 
 def getQuestion(categoryNumber):
     url = 'https://opentdb.com/api.php?amount=1&category=' + str(categoryNumber) + '&type=boolean' #makes the url with the right category number
     jsonString = urllib2.urlopen(url).read() #makes it into python from json
     return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
+
+def start_game(numberOfPlayers, topic):
+    if(numberOfPlayers == "1"):
+        speech_output = "You have chosen single player mode"
+    else:
+        speech_output = "You have chosen multi player mode with " + numberOfPlayers + " players"
+    return generate_question(topic, speech_output)
 
 
 def on_intent(intent_request, session):
@@ -117,16 +127,16 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "RandomModeIntent":
-        return setMode({"mode": "random"}, "You have chosen random mode. ")
+        return setModeAndAskNumber({"mode": "random"}, "You have chosen random mode. ")
     if intent_name == "ChooseTopicIntent":
         topic = intent['slots']['ChosenTopic']['value']
-        return setMode({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
+        return setModeAndAskNumber({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
     elif intent_name == "ListModeIntent":
         return list_all_topics()
     elif intent_name == "NumberOfPlayersIntent":
         numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
         attributes = {"players": numberOfPlayers} #making a new attribute for number of players.
-        return generate_question(session['attributes']['topic']) #lookins in attributes for the current topic value
+        return start_game(numberOfPlayers, session['attributes']['topic']) #lookins in attributes for the current topic value
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":

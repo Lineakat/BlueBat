@@ -23,6 +23,15 @@
           "type": "NUMBER_OF_PLAYERS"
         }
       ]
+    },
+    {
+      "intent": "TrueIntent"
+    },
+    {
+      "intent": "FalseIntent"
+    },
+    {
+      "intent": "RepeatQuestionIntent"
     }
   ]
 }
