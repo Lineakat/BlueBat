@@ -123,6 +123,11 @@ def evaluate(answer, attributes):
         speech_output = "Your answer is wrong. Too bad "
     return generate_question(speech_output, attributes)
 
+def endGame(attributes):
+    speech_output = "You have ended the game. Your score is 0" # score
+    speechlet_response = build_speechlet_response("End Game", speech_output, "", True)
+    return build_response(attributes, speechlet_response)
+
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
 
@@ -160,6 +165,9 @@ def on_intent(intent_request, session):
 
     if intent_name == "FalseIntent":
         return evaluate(False, session['attributes'])
+
+    if intent_name == "EndGameIntent": # reads score and finishes game
+        return endGame(session['attributes']) # add end game method
 
     if intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
