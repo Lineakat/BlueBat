@@ -96,11 +96,16 @@ def list_all_topics():
     return build_response(session_attributes, speechlet_response)
 
 def generate_question(speech_output, attributes):
+    currentPlayer = attributes['questionNumber'] % attributes['numberOfPlayers']
     api_question = getQuestion(categories[attributes["topic"]]) #gets all of the information about a question
     attributes["api_question"] = api_question # saving api_question with existing attributes
+    if (attributes['numberOfPlayers'] > 1):
+        speech_output = speech_output + " Player " + str(currentPlayer + 1) + ": "
+    speech_output = speech_output + api_question["question"] + " true or false?"
 
     # question["question"] means that it only returns the value that fits with the question key
-    speechlet_response = build_speechlet_response("Question", speech_output + api_question["question"] + " true or false?" , api_question["question"] + " true or false?" , False)
+    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " true or false?" , False)
+
     return build_response(attributes, speechlet_response)
 
 def getQuestion(categoryNumber):
@@ -108,23 +113,46 @@ def getQuestion(categoryNumber):
     jsonString = urllib2.urlopen(url).read() #makes it into python from json
     return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
 
-def start_game(numberOfPlayers, attributes):
-    if(numberOfPlayers == "1"):
+def start_game(attributes):
+    numberOfPlayers = attributes['numberOfPlayers']
+    attributes["score"] = {}
+    for x in range(0, numberOfPlayers):
+        attributes["score"][str(x)] = 0
+    if(numberOfPlayers == 1):
         speech_output = "You have chosen singleplayer mode, "
     else:
-        speech_output = "You have chosen multiplayer mode with " + numberOfPlayers + " players, "
+        speech_output = "You have chosen multiplayer mode with " + str(numberOfPlayers) + " players, "
     return generate_question(speech_output, attributes)
 
 
 def evaluate(answer, attributes):
+
+    currentPlayer = attributes['questionNumber'] % attributes['numberOfPlayers']
     if(str(answer) == attributes["api_question"]["correct_answer"]):
-        speech_output = "Your answer is correct, congratulations!"
+        attributes["score"][str(currentPlayer)] = attributes["score"][str(currentPlayer)] + 1
+        speech_output = "Your answer is correct, congratulations! "
     else:
         speech_output = "Your answer is wrong. Too bad "
+    currentScore = attributes["score"][str(currentPlayer)]
+    speech_output = speech_output + " Player " + str(currentPlayer + 1) + " has " + str(currentScore) + " point"
+    if (currentScore == 1):
+        speech_output = speech_output + ". "
+    else:
+        speech_output = speech_output + "s. "
+    attributes['questionNumber'] = attributes['questionNumber'] + 1
     return generate_question(speech_output, attributes)
 
 def endGame(attributes):
-    speech_output = "You have ended the game. Your score is 0" # score
+    speech_output = "You ended the game. "
+    if(attributes['numberOfPlayers'] == 1):
+        speech_output = speech_output + "Your final score is: " + str(attributes["score"]["0"]) + "."
+    else:
+        speech_output = speech_output + "The final scores are: "
+        players = attributes['score'].keys()
+        players.sort(key=lambda x: attributes['score'][x])
+        for player in players:
+            score = attributes['score'][player]
+            speech_output = speech_output + "Player " + str(player+1) + " has " + str(score) + " points, "
     speechlet_response = build_speechlet_response("End Game", speech_output, "", True)
     return build_response(attributes, speechlet_response)
 
@@ -152,8 +180,10 @@ def on_intent(intent_request, session):
 
     if intent_name == "NumberOfPlayersIntent":
         numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
-        attributes = {"players": numberOfPlayers} #making a new attribute for number of players.
-        return start_game(numberOfPlayers, session['attributes']) #lookins in attributes for the current topic value
+        attributes = session['attributes']
+        attributes['numberOfPlayers'] = int(numberOfPlayers)
+        attributes['questionNumber'] = 0
+        return start_game(attributes) #lookins in attributes for the current topic value
 
     if intent_name == "RepeatQuestionIntent":
         question = session['attributes']['api_question']['question'] + " true or false?" #looking at the attributes for the whole question slot and finding the actual question
