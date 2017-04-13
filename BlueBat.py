@@ -101,10 +101,10 @@ def generate_question(speech_output, attributes):
     attributes["api_question"] = api_question # saving api_question with existing attributes
     if (attributes['numberOfPlayers'] > 1):
         speech_output = speech_output + " Player " + str(currentPlayer + 1) + ": "
-    speech_output = speech_output + api_question["question"] + " true or false?"
+    speech_output = speech_output + api_question["question"] + " .True, or false?"
 
     # question["question"] means that it only returns the value that fits with the question key
-    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " true or false?" , False)
+    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " True, or false?" , False)
 
     return build_response(attributes, speechlet_response)
 
@@ -132,7 +132,7 @@ def evaluate(answer, attributes):
         attributes["score"][str(currentPlayer)] = attributes["score"][str(currentPlayer)] + 1
         speech_output = "Your answer is correct, congratulations! "
     else:
-        speech_output = "Your answer is wrong. Too bad "
+        speech_output = "Your answer is wrong. Too bad.  "
     currentScore = attributes["score"][str(currentPlayer)]
     speech_output = speech_output + " Player " + str(currentPlayer + 1) + " has " + str(currentScore) + " point"
     if (currentScore == 1):
@@ -149,10 +149,17 @@ def endGame(attributes):
     else:
         speech_output = speech_output + "The final scores are: "
         players = attributes['score'].keys()
-        players.sort(key=lambda x: attributes['score'][x])
-        for player in players:
+        players.sort(key=lambda x: attributes['score'][x], reverse = True)
+        speech_output = speech_output + "Player " + str(int(players[0])+1) + " has won with a total of " + str(attributes['score'][players[0]]) + "point"
+        if(attributes['score'][players[0]] != 1):
+            speech_output = speech_output + "s. "
+        for player in players[1:]:
             score = attributes['score'][player]
-            speech_output = speech_output + "Player " + str(player+1) + " has " + str(score) + " points, "
+            speech_output = speech_output + "Player " + str(int(player)+1) + " has " + str(score) + " point"
+            if (attributes['score'][player] != 1):
+                speech_output = speech_output + "s, "
+            else:
+                speech_output = speech_output + ", "
     speechlet_response = build_speechlet_response("End Game", speech_output, "", True)
     return build_response(attributes, speechlet_response)
 
