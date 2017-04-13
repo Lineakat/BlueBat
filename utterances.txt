@@ -87,3 +87,11 @@ RepeatQuestionIntent What did you say
 RepeatQuestionIntent What was the question
 RepeatQuestionIntent I didn't catch that
 RepeatQuestionIntent What
+EndGameIntent End game
+EndGameIntent Final score
+EndGameIntent Stop game
+EndGameIntent I don't want to play anymore
+EndGameIntent Please stop the game
+EndGameIntent Tell me the final score
+EndGameIntent End the game please
+EndGameIntent
