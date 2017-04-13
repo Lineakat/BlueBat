@@ -14,7 +14,13 @@ import json
 categories = {
     "animals" : 27,
     "general knowledge" : 9,
-    "music" : 12
+    "music" : 12,
+    "movies" :  11,
+    "computers" : 18,
+    "video games" : 15,
+    "gadgets" : 30,
+    "cartoons" : 32,
+    "science" : 17
 }
 
 # --------------- Helpers that build all of the responses ----------------------
@@ -77,8 +83,10 @@ def on_launch(launch_request, session):
     # Dispatch to your skill's launch
     return get_welcome_response()
 
+
 def setModeAndAskNumber(attributes, modeSpeech):
-    playersPrompt = "How many people are playing?"
+    attributes["state"] = "waitingForNumberOfPlayers"
+    playersPrompt = "How many people are playing? The game supports up to 5 players."
     return build_response(attributes, build_speechlet_response(playersPrompt, modeSpeech + playersPrompt, playersPrompt, False))
 
 
@@ -95,25 +103,32 @@ def list_all_topics():
     speechlet_response = build_speechlet_response("List of topics", speech_output, reprompt_text, should_end_session)
     return build_response(session_attributes, speechlet_response)
 
+
 def generate_question(speech_output, attributes):
     currentPlayer = attributes['questionNumber'] % attributes['numberOfPlayers']
-    api_question = getQuestion(categories[attributes["topic"]]) #gets all of the information about a question
+    if "topic" in attributes:
+        url = 'https://opentdb.com/api.php?amount=1&category=' + str(categories[attributes["topic"]]) + '&type=boolean'  # makes the url with the right category number
+    else:
+        url = 'https://opentdb.com/api.php?amount=1&type=boolean'
+    api_question = getQuestion(url)  # gets all of the information about a question
     attributes["api_question"] = api_question # saving api_question with existing attributes
     if (attributes['numberOfPlayers'] > 1):
         speech_output = speech_output + " Player " + str(currentPlayer + 1) + ": "
-    speech_output = speech_output + api_question["question"] + " .True, or false?"
+    speech_output = speech_output + api_question["question"] + " True or false?"
 
     # question["question"] means that it only returns the value that fits with the question key
-    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " True, or false?" , False)
+    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " True or false?" , False)
 
     return build_response(attributes, speechlet_response)
 
-def getQuestion(categoryNumber):
-    url = 'https://opentdb.com/api.php?amount=1&category=' + str(categoryNumber) + '&type=boolean' #makes the url with the right category number
+
+def getQuestion(url):
     jsonString = urllib2.urlopen(url).read() #makes it into python from json
     return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
 
+
 def start_game(attributes):
+    attributes["state"] = "inGame"
     numberOfPlayers = attributes['numberOfPlayers']
     attributes["score"] = {}
     for x in range(0, numberOfPlayers):
@@ -126,7 +141,6 @@ def start_game(attributes):
 
 
 def evaluate(answer, attributes):
-
     currentPlayer = attributes['questionNumber'] % attributes['numberOfPlayers']
     if(str(answer) == attributes["api_question"]["correct_answer"]):
         attributes["score"][str(currentPlayer)] = attributes["score"][str(currentPlayer)] + 1
@@ -134,13 +148,17 @@ def evaluate(answer, attributes):
     else:
         speech_output = "Your answer is wrong. Too bad.  "
     currentScore = attributes["score"][str(currentPlayer)]
-    speech_output = speech_output + " Player " + str(currentPlayer + 1) + " has " + str(currentScore) + " point"
+    if(attributes['numberOfPlayers'] == 1):
+        speech_output = speech_output + " You have " + str(currentScore) + " point"
+    else:
+        speech_output = speech_output + " Player " + str(currentPlayer + 1) + " has " + str(currentScore) + " point"
     if (currentScore == 1):
         speech_output = speech_output + ". "
     else:
         speech_output = speech_output + "s. "
     attributes['questionNumber'] = attributes['questionNumber'] + 1
     return generate_question(speech_output, attributes)
+
 
 def endGame(attributes):
     speech_output = "You ended the game. "
@@ -163,6 +181,12 @@ def endGame(attributes):
     speechlet_response = build_speechlet_response("End Game", speech_output, "", True)
     return build_response(attributes, speechlet_response)
 
+
+def invalidIntent(attributes):
+    speech_output = "Wot mate?"
+    speechlet_response = build_speechlet_response("WOT", speech_output, "", False)
+    return build_response(attributes, speechlet_response)
+
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
 
@@ -176,16 +200,25 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "RandomModeIntent":
+        if("attributes" in session and "state" in session['attributes']):
+            return invalidIntent(session["attributes"])
+
         return setModeAndAskNumber({"mode": "random"}, "You have chosen random mode. ")
 
     if intent_name == "ChooseTopicIntent":
+        if("attributes" in session and "state" in session['attributes']):
+            return invalidIntent(session["attributes"])
         topic = intent['slots']['ChosenTopic']['value']
-        return setModeAndAskNumber({"mode": "chosen", "topic": topic}, "You have chosen " + topic + " mode. ")
+        return setModeAndAskNumber({"mode": "chosen", "topic": topic}, "You have chosen " + topic + ". ")
 
     if intent_name == "ListModeIntent":
+        if("attributes" in session and "state" in session['attributes']):
+            return invalidIntent(session["attributes"])
         return list_all_topics()
 
     if intent_name == "NumberOfPlayersIntent":
+        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "waitingForNumberOfPlayers"):
+            return invalidIntent(session["attributes"])
         numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
         attributes = session['attributes']
         attributes['numberOfPlayers'] = int(numberOfPlayers)
@@ -193,17 +226,25 @@ def on_intent(intent_request, session):
         return start_game(attributes) #lookins in attributes for the current topic value
 
     if intent_name == "RepeatQuestionIntent":
+        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+            return invalidIntent(session.get("attributes", {}))
         question = session['attributes']['api_question']['question'] + " true or false?" #looking at the attributes for the whole question slot and finding the actual question
         speechlet_response = build_speechlet_response("Question", question, question, False)
         return build_response({}, speechlet_response)
 
     if intent_name == "TrueIntent":
+        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+            return invalidIntent(session.get("attributes", {}))
         return evaluate(True, session['attributes'])
 
     if intent_name == "FalseIntent":
+        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+            return invalidIntent(session.get("attributes", {}))
         return evaluate(False, session['attributes'])
 
     if intent_name == "EndGameIntent": # reads score and finishes game
+        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+            return invalidIntent(session.get("attributes", {}))
         return endGame(session['attributes']) # add end game method
 
     if intent_name == "AMAZON.HelpIntent":

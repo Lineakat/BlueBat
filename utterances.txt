@@ -25,6 +25,16 @@ RandomModeIntent all topics
 RandomModeIntent all subjects
 RandomModeIntent all themes
 RandomModeIntent all areas
+RandomModeIntent shuffle
+RandomModeIntent shuffle all
+RandomModeIntent shuffle all topics
+RandomModeIntent shuffle all questions
+RandomModeIntent shuffle all subjects
+RandomModeIntent shuffle all themes
+RandomModeIntent shuffle topics
+RandomModeIntent shuffle questions
+RandomModeIntent shuffle subjects
+RandomModeIntent shuffle theme
 ListModeIntent pick a topic
 ListModeIntent pick a subject
 ListModeIntent pick a theme
