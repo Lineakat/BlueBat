@@ -35,6 +35,18 @@
     },
     {
       "intent": "EndGameIntent"
+    },
+    {
+      "intent": "FatSnakeIntent"
+    },
+    {
+      "intent": "CreditIntent"
+    },
+    {
+      "intent": "SkinnyPigeonIntent"
+    },
+    {
+      "intent": "BlueBatIntent"
     }
   ]
 }

@@ -247,6 +247,22 @@ def on_intent(intent_request, session):
             return invalidIntent(session.get("attributes", {}))
         return endGame(session['attributes']) # add end game method
 
+    if intent_name == "FatSnakeIntent":
+        speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake!", "hisssssssssssss!", False)
+        return build_response({}, speechlet_response)
+
+    if intent_name == "CreditIntent":
+        speechlet_response = build_speechlet_response("Credits", "This piece of art was brought into existence in 2017 by the following blue bats: Alistair Smith aka Flight of Stairs, Katie Worton aka Catamorpheus, Linea Katrine Wesnaes aka Lineakat, Theodora Zamfirache aka iunodora.", "3 kewl 5 u", False)
+        return build_response({}, speechlet_response)
+
+    if intent_name == "SkinnyPigeonIntent":
+        speechlet_response = build_speechlet_response("Easter Egg", "I like seeds. Peep peep.", "peep peep, I'm pigeon, yay!", False)
+        return build_response({}, speechlet_response)
+
+    if intent_name == "BlueBatIntent":
+        speechlet_response = build_speechlet_response("BlueBats", "You won a prize. Check your phone. ", "Seriously. Check your phone. Now. Do it. Check your phone.", False)
+        return build_response({}, speechlet_response)
+
     if intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
 

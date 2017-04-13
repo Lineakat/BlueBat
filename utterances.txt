@@ -104,3 +104,7 @@ EndGameIntent I don't want to play anymore
 EndGameIntent Please stop the game
 EndGameIntent Tell me the final score
 EndGameIntent End the game please
+FatSnakeIntent Fat snake
+CreditIntent Credits
+SkinnyPigeonIntent Skinny Pigeon
+BlueBatIntent Blue Bat
