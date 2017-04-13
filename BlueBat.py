@@ -248,7 +248,7 @@ def on_intent(intent_request, session):
         return endGame(session['attributes']) # add end game method
 
     if intent_name == "FatSnakeIntent":
-        speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake!", "hisssssssssssss!", False)
+        speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake!", "hissssssssssssss!", False)
         return build_response({}, speechlet_response)
 
     if intent_name == "CreditIntent":
