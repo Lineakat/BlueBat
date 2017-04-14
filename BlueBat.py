@@ -163,7 +163,9 @@ def evaluate(answer, attributes):
 def endGame(attributes):
     speech_output = "You ended the game. "
     if(attributes['numberOfPlayers'] == 1):
-        speech_output = speech_output + "Your final score is: " + str(attributes["score"]["0"]) + "."
+        speech_output = speech_output + "Your final score is: " + str(attributes["score"]["0"]) + " point"
+        if (attributes['score']["0"] != 1):
+            speech_output = speech_output + "s. "
     else:
         speech_output = speech_output + "The final scores are: "
         players = attributes['score'].keys()
@@ -218,7 +220,7 @@ def on_intent(intent_request, session):
 
     if intent_name == "NumberOfPlayersIntent":
         if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "waitingForNumberOfPlayers"):
-            return invalidIntent(session["attributes"])
+            return invalidIntent(session.get("attributes", {}))
         numberOfPlayers = intent['slots']['NumberOfPlayers']['value']
         attributes = session['attributes']
         attributes['numberOfPlayers'] = int(numberOfPlayers)
@@ -248,7 +250,7 @@ def on_intent(intent_request, session):
         return endGame(session['attributes']) # add end game method
 
     if intent_name == "FatSnakeIntent":
-        speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake!", "hissssssssssssss!", False)
+        speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake! hissssssssssssss", "hissssssssssssss!", False)
         return build_response({}, speechlet_response)
 
     if intent_name == "CreditIntent":
