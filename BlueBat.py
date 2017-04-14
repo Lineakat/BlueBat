@@ -12,40 +12,36 @@ import urllib2
 import json
 
 categories = {
-    "animals" : 27,
-    "general knowledge" : 9,
-    "music" : 12,
-    "movies" :  11,
-    "computers" : 18,
-    "video games" : 15,
-    "gadgets" : 30,
-    "cartoons" : 32,
-    "science" : 17
+    "animals": 27,
+    "general knowledge": 9,
+    "music": 12,
+    "movies":  11,
+    "computers": 18,
+    "video games": 15,
+    "gadgets": 30,
+    "cartoons": 32,
+    "science": 17
 }
 
 # --------------- Helpers that build all of the responses ----------------------
 
-def build_speechlet_response(title, output, reprompt_text, should_end_session):
-    return {
-        'outputSpeech': {
-            'type': 'PlainText',
-            'text': output
-        },
-        'card': {
-            'type': 'Simple',
-            'title': "SessionSpeechlet - " + title,
-            'content': "SessionSpeechlet - " + output
-        },
-        'reprompt': {
-            'outputSpeech': {
-                'type': 'PlainText',
-                'text': reprompt_text
-            }
-        },
-        'shouldEndSession': should_end_session
-    }
 
-#returns a dictionary. Storing attributes... maybe
+def build_speechlet_response(title, output, reprompt_text, should_end_session, cardImage=None):
+
+    response = {'outputSpeech': {'type': 'PlainText', 'text': output},
+                'card': {'type': 'Simple', 'title': title, 'content': cardOutput},
+                'reprompt': {'outputSpeech': {'type': 'PlainText', 'text': reprompt_text}},
+                'shouldEndSession': should_end_session}
+
+    if cardImage != None:
+        response['card']['image'] = {
+            "smallImageUrl": cardImage,
+            "largeImageUrl": cardImage
+        }
+
+    return response
+
+
 def build_response(session_attributes, speechlet_response):
     return {
         'version': '1.0',
@@ -62,12 +58,12 @@ def get_welcome_response():
     """
 
     session_attributes = {}
-    card_title = "Welcome" #comes up on the app
+    card_title = "Welcome"  # comes up on the app
     speech_output = "Welcome to the blue bat quiz game. " \
                     "Do you want to pick a topic, shuffle all questions or do you want me to list all the topics. "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
-    reprompt_text = "Do you want to pick a topic, shuffle all questions or do you want me to list all the topics. " #if user doesnt answer
+    reprompt_text = "Do you want to pick a topic, shuffle all questions or do you want me to list all the topics. "  # if user doesnt answer
     should_end_session = False
     speechlet_response = build_speechlet_response(card_title, speech_output, reprompt_text, should_end_session)
     return build_response(session_attributes, speechlet_response)
@@ -111,20 +107,20 @@ def generate_question(speech_output, attributes):
     else:
         url = 'https://opentdb.com/api.php?amount=1&type=boolean'
     api_question = getQuestion(url)  # gets all of the information about a question
-    attributes["api_question"] = api_question # saving api_question with existing attributes
-    if (attributes['numberOfPlayers'] > 1):
+    attributes["api_question"] = api_question  # saving api_question with existing attributes
+    if attributes['numberOfPlayers'] > 1:
         speech_output = speech_output + " Player " + str(currentPlayer + 1) + ": "
     speech_output = speech_output + api_question["question"] + " True or false?"
 
     # question["question"] means that it only returns the value that fits with the question key
-    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " True or false?" , False)
+    speechlet_response = build_speechlet_response("Question", speech_output, api_question["question"] + " True or false?", False)
 
     return build_response(attributes, speechlet_response)
 
 
 def getQuestion(url):
-    jsonString = urllib2.urlopen(url).read() #makes it into python from json
-    return json.loads(jsonString)["results"][0] #returns the entire question with all the information attatched
+    jsonString = urllib2.urlopen(url).read()  # makes it into python from json
+    return json.loads(jsonString)["results"][0]  # returns the entire question with all the information attatched
 
 
 def start_game(attributes):
@@ -133,7 +129,7 @@ def start_game(attributes):
     attributes["score"] = {}
     for x in range(0, numberOfPlayers):
         attributes["score"][str(x)] = 0
-    if(numberOfPlayers == 1):
+    if numberOfPlayers == 1:
         speech_output = "You have chosen singleplayer mode, "
     else:
         speech_output = "You have chosen multiplayer mode with " + str(numberOfPlayers) + " players, "
@@ -142,17 +138,17 @@ def start_game(attributes):
 
 def evaluate(answer, attributes):
     currentPlayer = attributes['questionNumber'] % attributes['numberOfPlayers']
-    if(str(answer) == attributes["api_question"]["correct_answer"]):
+    if str(answer) == attributes["api_question"]["correct_answer"]:
         attributes["score"][str(currentPlayer)] = attributes["score"][str(currentPlayer)] + 1
         speech_output = "Your answer is correct, congratulations! "
     else:
         speech_output = "Your answer is wrong. Too bad.  "
     currentScore = attributes["score"][str(currentPlayer)]
-    if(attributes['numberOfPlayers'] == 1):
+    if attributes['numberOfPlayers'] == 1:
         speech_output = speech_output + " You have " + str(currentScore) + " point"
     else:
         speech_output = speech_output + " Player " + str(currentPlayer + 1) + " has " + str(currentScore) + " point"
-    if (currentScore == 1):
+    if currentScore == 1:
         speech_output = speech_output + ". "
     else:
         speech_output = speech_output + "s. "
@@ -169,14 +165,14 @@ def endGame(attributes):
     else:
         speech_output = speech_output + "The final scores are: "
         players = attributes['score'].keys()
-        players.sort(key=lambda x: attributes['score'][x], reverse = True)
+        players.sort(key = lambda x: attributes['score'][x], reverse = True)
         speech_output = speech_output + "Player " + str(int(players[0])+1) + " has won with a total of " + str(attributes['score'][players[0]]) + "point"
-        if(attributes['score'][players[0]] != 1):
+        if attributes['score'][players[0]] != 1:
             speech_output = speech_output + "s. "
         for player in players[1:]:
             score = attributes['score'][player]
             speech_output = speech_output + "Player " + str(int(player)+1) + " has " + str(score) + " point"
-            if (attributes['score'][player] != 1):
+            if attributes['score'][player] != 1:
                 speech_output = speech_output + "s, "
             else:
                 speech_output = speech_output + ", "
@@ -188,6 +184,7 @@ def invalidIntent(attributes):
     speech_output = "Wot mate?"
     speechlet_response = build_speechlet_response("WOT", speech_output, "", False)
     return build_response(attributes, speechlet_response)
+
 
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
@@ -202,19 +199,19 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "RandomModeIntent":
-        if("attributes" in session and "state" in session['attributes']):
+        if "attributes" in session and "state" in session['attributes']:
             return invalidIntent(session["attributes"])
 
         return setModeAndAskNumber({"mode": "random"}, "You have chosen random mode. ")
 
     if intent_name == "ChooseTopicIntent":
-        if("attributes" in session and "state" in session['attributes']):
+        if "attributes" in session and "state" in session['attributes']:
             return invalidIntent(session["attributes"])
         topic = intent['slots']['ChosenTopic']['value']
         return setModeAndAskNumber({"mode": "chosen", "topic": topic}, "You have chosen " + topic + ". ")
 
     if intent_name == "ListModeIntent":
-        if("attributes" in session and "state" in session['attributes']):
+        if "attributes" in session and "state" in session['attributes']:
             return invalidIntent(session["attributes"])
         return list_all_topics()
 
@@ -225,36 +222,38 @@ def on_intent(intent_request, session):
         attributes = session['attributes']
         attributes['numberOfPlayers'] = int(numberOfPlayers)
         attributes['questionNumber'] = 0
-        return start_game(attributes) #lookins in attributes for the current topic value
+        return start_game(attributes)  # looking in attributes for the current topic value
 
     if intent_name == "RepeatQuestionIntent":
-        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+        if "attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame":
             return invalidIntent(session.get("attributes", {}))
-        question = session['attributes']['api_question']['question'] + " true or false?" #looking at the attributes for the whole question slot and finding the actual question
+        question = session['attributes']['api_question']['question'] + " true or false?"  # looking at the attributes for the whole question slot and finding the actual question
         speechlet_response = build_speechlet_response("Question", question, question, False)
         return build_response({}, speechlet_response)
 
     if intent_name == "TrueIntent":
-        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+        if "attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame":
             return invalidIntent(session.get("attributes", {}))
         return evaluate(True, session['attributes'])
 
     if intent_name == "FalseIntent":
-        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+        if "attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame":
             return invalidIntent(session.get("attributes", {}))
         return evaluate(False, session['attributes'])
 
-    if intent_name == "EndGameIntent": # reads score and finishes game
-        if ("attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame"):
+    if intent_name == "EndGameIntent":  # reads score and finishes game
+        if "attributes" not in session or "state" not in session['attributes'] or session['attributes']['state'] != "inGame":
             return invalidIntent(session.get("attributes", {}))
-        return endGame(session['attributes']) # add end game method
+        return endGame(session['attributes'])
 
     if intent_name == "FatSnakeIntent":
         speechlet_response = build_speechlet_response("Easter Egg", "Too fat to snake! hissssssssssssss", "hissssssssssssss!", False)
         return build_response({}, speechlet_response)
 
     if intent_name == "CreditIntent":
-        speechlet_response = build_speechlet_response("Credits", "This piece of art was brought into existence in 2017 by the following blue bats: Alistair Smith aka Flight of Stairs, Katie Worton aka Catamorpheus, Linea Katrine Wesnaes aka Lineakat, Theodora Zamfirache aka iunodora.", "3 kewl 5 u", False)
+        output = "This piece of art was brought into existence in 2017 by the following blue bats: Alistair Smith aka Flight of Stairs, Katie Worton aka Catamorpheus, Linea Katrine Wesnaes aka Lineakat, Theodora Zamfirache aka iunodora."
+        cardImage = "http://www.clipartlord.com/wp-content/uploads/2016/09/bat19.png"
+        speechlet_response = build_speechlet_response("Credits", output, "3 kewl 5 u", False, cardImage)
         return build_response({}, speechlet_response)
 
     if intent_name == "SkinnyPigeonIntent":
@@ -274,21 +273,9 @@ def on_intent(intent_request, session):
         raise ValueError("Invalid intent")
 
 
-def lambda_handler(event, context): #this is where it starts from. Our main
-    """ Route the incoming request based on type (LaunchRequest, IntentRequest,
-    etc.) The JSON body of the request is provided in the event parameter.
-    """
+def lambda_handler(event, context):  # this is where it starts from. Our main
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
-
-    """
-    Uncomment this if statement and populate with your skill's application ID to
-    prevent someone else from configuring a skill that sends requests to this
-    function.
-    """
-    # if (event['session']['application']['applicationId'] !=
-    #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
-    #     raise ValueError("Invalid Application ID")
 
     if event['request']['type'] == "LaunchRequest":
         return on_launch(event['request'], event['session'])
