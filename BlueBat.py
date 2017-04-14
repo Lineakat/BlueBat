@@ -29,7 +29,7 @@ categories = {
 def build_speechlet_response(title, output, reprompt_text, should_end_session, cardImage=None):
 
     response = {'outputSpeech': {'type': 'PlainText', 'text': output},
-                'card': {'type': 'Simple', 'title': title, 'content': cardOutput},
+                'card': {'type': 'Simple', 'title': title, 'content': output},
                 'reprompt': {'outputSpeech': {'type': 'PlainText', 'text': reprompt_text}},
                 'shouldEndSession': should_end_session}
 
